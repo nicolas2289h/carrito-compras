@@ -1,24 +1,41 @@
 import React, { useState } from 'react'
+import TiendaLogo from '../assets/tienda-logo.png'
 
 function Header({ allProducts, setAllProducts, total, setTotal, countProducts, setCountProducts }) {
 
     const [active, setActive] = useState(false)
 
-    const clearCart = ()=>{
+    const clearCart = () => {
         setTotal(0)
         setCountProducts(0)
         setAllProducts([])
     }
 
-    const removeFromCart = (producto)=>{
+    const removeOneFromCart = (product) => {
+        const encontrado = allProducts.find(item => item.id == product.id)
+        if (encontrado.quantity > 1) {
+            setAllProducts(allProducts.map(item => item.id == product.id ? { ...item, quantity: item.quantity - 1 } : item))
+            setTotal(total - product.price)
+            setCountProducts(countProducts - 1)
+        } else {
+            setAllProducts(allProducts.filter(item => item.id !== product.id))
+            setTotal(total - product.price * product.quantity)
+            setCountProducts(countProducts - product.quantity)
+        }
+    }
+
+    const removeFromCart = (producto) => {
         setTotal(total - producto.price * producto.quantity)
-        setAllProducts(allProducts.filter(item=> item.id != producto.id))
+        setAllProducts(allProducts.filter(item => item.id != producto.id))
         setCountProducts(countProducts - producto.quantity)
     }
 
     return (
         <header>
-            <h1>Tienda Virtual</h1>
+            <div className='container-logo-tienda'>
+                <img src={TiendaLogo} alt="Logo de la tienda virtual" />
+                <h1>Tienda Virtual</h1>
+            </div>
 
             <div className="container-icon">
                 <div className="container-cart-icon cart-icon " onClick={() => setActive(!active)}>
@@ -41,34 +58,22 @@ function Header({ allProducts, setAllProducts, total, setTotal, countProducts, s
                     </div>
                 </div>
 
-                <div className={`container-cart-products ${active ? `hidden-cart` : null}`}>
+                <div className={`container-cart-products ${!active ? `hidden-cart` : null}`}>
                     {
                         allProducts.length ? (
                             <>
                                 <div className="row-product">
-                                    {allProducts.map(item=>(
+                                    {allProducts.map(item => (
                                         <div key={item.id} className="cart-product">
-                                        <div className="info-cart-product">
-                                            <span className="cantidad-producto-carrito">{item.quantity}</span>
-                                            <p className="titulo-producto-carrito">{item.nameProduct}</p>
-                                            <span className="precio-producto-carrito">$ {item.price}</span>
+                                            <div className="info-cart-product">
+                                                <p className="titulo-producto-carrito">{item.nameProduct}</p>
+                                                <span className="precio-producto-carrito">{item.quantity} <span className='simbolo-x'>x</span> $ {item.price}</span>
+                                            </div>
+                                            <div className='cart-product-options'>
+                                                <span className='icon-decrement' onClick={() => removeOneFromCart(item)}>➖</span>
+                                                <span className='icon-bin' onClick={() => removeFromCart(item)}>🗑</span>
+                                            </div>
                                         </div>
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            strokeWidth="1.5"
-                                            stroke="currentColor"
-                                            className="icon-close"
-                                            onClick={()=>removeFromCart(item)}
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                d="M6 18L18 6M6 6l12 12"
-                                            />
-                                        </svg>
-                                    </div>
                                     ))}
                                 </div>
 
